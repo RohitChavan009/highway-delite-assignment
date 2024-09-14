@@ -40,15 +40,17 @@ const Dashboard = () => {
 
   const [user, setUser] = useState<UserInterface | null>(null);
 
-  const secret: string | undefined = Cookies.get("tokens")!;
+  const credentials: string | undefined = Cookies.get("tokens")!;
 
-  const { accessToken } = JSON.parse(secret);
+  let secret: { accessToken: string; refreshToken: string } | null = null;
+
+  if (credentials) secret = JSON.parse(credentials);
 
   const getProfile = useCallback(async () => {
     try {
       const response = await fetch("/api/profile", {
         method: "GET",
-        headers: { authorization: `Bearer ${accessToken}` },
+        headers: { authorization: `Bearer ${secret?.accessToken}` },
       });
 
       if (response.status === 200) {
@@ -68,7 +70,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [secret]);
 
   // on page load
   useEffect(() => {
